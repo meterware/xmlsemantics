@@ -41,6 +41,9 @@ import java.util.Date;
 
 
 /**
+ * The Main class for interpreting XML. Provides methods to parse raw XML, populate data objects from a DOM,
+ * and generate XML from data objects.
+ *
  * @author <a href="mailto:russgold@gmail.com">Russell Gold</a>
  */
 public class XmlSemantics {
@@ -53,15 +56,15 @@ public class XmlSemantics {
     /**
      * Given an XML DOM and a new object, fills in the object with values from the DOM and returns it.
      * @param document the DOM achieved through parsing an XML file
-     * @param documentRoot the object which should be populated from the XML DOM
+     * @param dataObject the object which should be populated from the XML DOM
      * @param documentName the name of the document, used for error message generation.
      * @param <T> the type of the object to populate
      * @return the populated object
      */
-    public static <T> T build(Document document, T documentRoot, String documentName) {
+    public static <T> T build(Document document, T dataObject, String documentName) {
         try {
-            interpretNode(getRootNode(document), documentRoot);
-            return documentRoot;
+            interpretNode(getRootNode(document), dataObject);
+            return dataObject;
         } catch (InvocationTargetException e) {
             throw new RuntimeException("Error interpreting document: " + documentName + ": " + e.getTargetException());
         } catch (Exception e) {

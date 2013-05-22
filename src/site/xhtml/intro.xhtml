@@ -1,0 +1,64 @@
+<html>
+<head><title>XMLSemantics: Intro</title></head>
+<body>
+<div class="section">
+<h2>Introduction to XmlSemantics</h2>
+<p>XMLSemantics pays no attention to XML schemas. It uses simple reflection to determine what parts of an XML file
+    are of interest, and ignores anything else. It treats attributes and nested simple values the same.</p>
+
+<h3>Example with attributes</h3>
+
+    <p>Assume that you have the following trivial XML:</p>
+
+    <div class="source">
+        <pre>
+            &lt;example quantity1="value1" quantity2="2" when="May 17, 2012"/&gt;</pre>
+    </div>
+
+    <p>To interpret it, we'll define a public class</p>
+
+    <div class="source">
+        <pre>
+            <b>public class</b> Example {
+                <b>private</b> String quantity1;
+                <b>private int</b> quantity2;
+                <b>private</b> Date when;
+
+                <b>public</b> setQuantity1(String quantity1) { <b>this</b>.quantity1 = quantity1; }
+                <b>public</b> setQuantity2(int quantity2) { <b>this</b>.quantity2 = quantity2; }
+                <b>public</b> setWhen(Date when) { <b>this</b>.when = when; }
+
+                <b>public</b> String getQuantity1() { return quantity1; }
+                <b>public int</b> getQuantity2() { return quantity2; }
+                <b>public</b> Date getWhen() { return when; }
+            }</pre>
+    </div>
+
+    <p>And then use XMLSemantics to populate it as follows:</p>
+    <pre>
+        Document dom = XMLSemantics.parseDocument(new File("example.xml"));
+        Example example = XMLSemantics.build(dom, new Example(), "example.xml");
+    </pre>
+    <p>This has the effect of populating the fields in the returned object with the corresponding attribute values.</p>
+
+    <h3>Example with simple elements</h3>
+
+    <p>You would get the exact same effect if the XML were defined as:</p>
+
+    <div class="source">
+        <pre>
+            &lt;example&gt;
+                &lt;quantity1&gt;value1&lt;/quantity1&gt;
+                &lt;quantity2&gt;2&lt;/quantity2&gt;
+                &lt;when&gt;5/17/2012&lt;/when&gt;
+            &lt;/example&gt;</pre>
+    </div>
+
+    <p>We use exactly the same code. XMLSemantics is happy to read either attributes or simple nested elements
+        and treat them the same.
+        In either case, it expects to find a public setter whose name matches the attribute name,
+        and does whatever type conversion is appropriate to invoke it.</p>
+
+</div>
+</body>
+</html>

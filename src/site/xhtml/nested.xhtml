@@ -1,0 +1,66 @@
+<html>
+<head><title>XMLSemantics: Nested Elements</title></head>
+<body>
+<div class="section">
+<h2>Handling Nested Elements</h2>
+
+    <p>To handle more complex xml, we use create methods to instantiate nested objects. For example:</p>
+
+    <div class="source">
+        <pre>
+            &lt;example&gt;
+                &lt;oil-paint color="red"/&gt;
+                &lt;oil-paint color="green"/&gt;
+            &lt;example/&gt;</pre>
+    </div>
+
+    <p>Here, the <code>oil-paint</code> element itself has attributes, so cannot be treated as a simple value.
+        When encountering a nested element, the <code>build</code> method looks for a method on the current
+        object named <code>createXXX</code>, where XXX is the name of the element.
+        An element name containing hyphens is interpreting as the equivalent camel case name.
+        So in this case, we create the following classes:</p>
+
+
+    <div class="source">
+        <pre>
+            <b>public</b> class Example {
+                <b>private</b> List&lt;OilPaint&gt; paints = <b>new</b> ArrayList&lt;&gt;();
+
+                <b>public</b> Paint createOilPaint() {
+                    Paint paint = <b>new</b> OilPaint();
+                    paints.add(paint);
+                    <b>return</b> paint;
+                }
+
+                <b>public</b> Paint[] getPaints() {
+                    <b>return</b> paints.toArray(<b>new</b> Paint[paints.size()]);
+                }
+            }
+
+            <b>public class</b> Paint {
+                <b>private</b> String color;
+
+                <b>public void</b> setColor(String color) { <b>this</b>.color = color; }
+                <b>public</b> String getColor() { <b>return</b> color; }
+            }</pre>
+    </div>
+
+    <p>Again, we populate the objects with:</p>
+    <pre>
+        Document dom = XMLSemantics.parseDocument(new File("example.xml"));
+        Example example = XMLSemantics.build(dom, new Example(), "example.xml");
+    </pre>
+    <p>In this case, when it encounters the &lt;oil-paint&gt; element, the <code>build</code>
+        method looks for a method named <code>createOilPaint</code> in Example. It calls that
+        and receives a Paint object. When it encounters the <code>color</code> attribute,
+        it calls the <code>setColor</code> method in Paint.
+    </p>
+
+    <p>If <code>oil-paint</code> itself had a nested element, the code would look for a matching
+        <code>createXXX</code> element on Paint, and so on. If a <code>setXXX</code> method is found
+        instead, its text contents are used to establish a value for the corresponding attribute.
+    </p>
+
+</div>
+</body>
+</html>
