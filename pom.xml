@@ -75,7 +75,7 @@
                     </execution>
                     <execution>
                         <id>default-deploy</id>
-                        <phase/>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
