@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>XmlSemantics - Source Repository</title>
+    <title>XmlSemantics - XMLSemantics: Nested Elements</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -47,37 +47,14 @@
                           <a href="intro.html" title="Introduction">Introduction</a>
             </li>
                   <li class="none">
-                          <a href="nested.html" title="Nested elements">Nested elements</a>
-            </li>
+            <strong>Nested elements</strong>
+          </li>
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                          <li class="expanded">
+                                                                                                                                                                                <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-                          <a href="index.html" title="About">About</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="dependency-info.html" title="Dependency Information">Dependency Information</a>
-            </li>
-                      <li class="none">
-            <strong>Source Repository</strong>
-          </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                         <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -91,27 +68,84 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Overview<a name="Overview"></a></h2><a name="Overview"></a>
-<p>This project uses a Source Content Management System to manage its source code.</p></div>
+        
+
+
+
 <div class="section">
-<h2>Web Access<a name="Web_Access"></a></h2><a name="Web_Access"></a>
-<p>The following is a link to the online source repository.</p>
+<h2>Handling Nested Elements<a name="Handling_Nested_Elements"></a></h2>
+
+    
+<p>To handle more complex xml, we use create methods to instantiate nested objects. For example:</p>
+
+    
+        
 <div class="source">
-<pre><a class="externalLink" href="https://github.com/russgold/xmlsemantics.git">https://github.com/russgold/xmlsemantics.git</a></pre></div></div>
-<div class="section">
-<h2>Anonymous access<a name="Anonymous_access"></a></h2><a name="Anonymous_access"></a>
-<p>Refer to the documentation of the SCM used for more information about anonymously check out. The connection url is:</p>
+<pre>
+            &lt;example&gt;
+                &lt;oil-paint color=&quot;red&quot;/&gt;
+                &lt;oil-paint color=&quot;green&quot;/&gt;
+            &lt;example/&gt;</pre></div>
+    
+
+    
+<p>Here, the <tt>oil-paint</tt> element itself has attributes, so cannot be treated as a simple value.
+        When encountering a nested element, the <tt>build</tt> method looks for a method on the current
+        object named <tt>createXXX</tt>, where XXX is the name of the element.
+        An element name containing hyphens is interpreting as the equivalent camel case name.
+        So in this case, we create the following classes:</p>
+
+
+    
+        
 <div class="source">
-<pre>git:https://github.com/russgold/xmlsemantics.git</pre></div></div>
-<div class="section">
-<h2>Developer access<a name="Developer_access"></a></h2><a name="Developer_access"></a>
-<p>Refer to the documentation of the SCM used for more information about developer check out. The connection url is:</p>
-<div class="source">
-<pre>git:https://github.com/russgold/xmlsemantics.git</pre></div></div>
-<div class="section">
-<h2>Access from behind a firewall<a name="Access_from_behind_a_firewall"></a></h2><a name="Access_from_behind_a_firewall"></a>
-<p>Refer to the documentation of the SCM used for more information about access behind a firewall.</p></div>
+<pre>
+            <b>public</b> class Example {
+                <b>private</b> List&lt;OilPaint&gt; paints = <b>new</b> ArrayList&lt;&gt;();
+
+                <b>public</b> Paint createOilPaint() {
+                    Paint paint = <b>new</b> OilPaint();
+                    paints.add(paint);
+                    <b>return</b> paint;
+                }
+
+                <b>public</b> Paint[] getPaints() {
+                    <b>return</b> paints.toArray(<b>new</b> Paint[paints.size()]);
+                }
+            }
+
+            <b>public class</b> Paint {
+                <b>private</b> String color;
+
+                <b>public void</b> setColor(String color) { <b>this</b>.color = color; }
+                <b>public</b> String getColor() { <b>return</b> color; }
+            }</pre></div>
+    
+
+    
+<p>Again, we populate the objects with:</p>
+    
+<div>
+<pre>
+        Document dom = XMLSemantics.parseDocument(new File(&quot;example.xml&quot;));
+        Example example = XMLSemantics.build(dom, new Example(), &quot;example.xml&quot;);
+    </pre></div>
+    
+<p>In this case, when it encounters the &lt;oil-paint&gt; element, the <tt>build</tt>
+        method looks for a method named <tt>createOilPaint</tt> in Example. It calls that
+        and receives a Paint object. When it encounters the <tt>color</tt> attribute,
+        it calls the <tt>setColor</tt> method in Paint.
+    </p>
+
+    
+<p>If <tt>oil-paint</tt> itself had a nested element, the code would look for a matching
+        <tt>createXXX</tt> element on Paint, and so on. If a <tt>setXXX</tt> method is found
+        instead, its text contents are used to establish a value for the corresponding attribute.
+    </p>
+
+
+</div>
+
       </div>
     </div>
     <div class="clear">
