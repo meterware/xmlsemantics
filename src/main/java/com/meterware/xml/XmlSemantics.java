@@ -74,7 +74,12 @@ public class XmlSemantics {
     }
 
 
-    private static Node getRootNode(Document document) {
+    /**
+     * Returns the root node for the document, defined structurally as the first child of the document
+     * which is an element.
+     * @param document the document whose root node is to be returned.
+     */
+    public static Node getRootNode(Document document) {
         Node node = document.getFirstChild();
         while (node != null && node.getNodeType() != Node.ELEMENT_NODE) node = node.getNextSibling();
         if (node != null) return node;
@@ -268,7 +273,7 @@ public class XmlSemantics {
     }
 
 
-    private static String getStringProperty(String propertyName, Object template) {
+    public static String getStringProperty(String propertyName, Object template) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(template.getClass(), Object.class);
             final PropertyDescriptor propertyDescriptor = getProperty(beanInfo, propertyName);
