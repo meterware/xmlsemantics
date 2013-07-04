@@ -9,7 +9,7 @@
 
     <groupId>com.meterware.xml</groupId>
     <artifactId>xmlsemantics</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.1</version>
 
     <name>XmlSemantics</name>
     <description>A tool to simplify interpretation of XML documents.
